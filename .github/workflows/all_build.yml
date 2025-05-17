@@ -172,38 +172,6 @@ jobs:
   #         name: SatDump-Windows_arm64_Portable
   #         path: ${{runner.workspace}}/build/Release/*
 
-  build_android:
-    runs-on: android-release
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get dependency version
-        id: android-deps-ver
-        run: commit=$(git -C $GITHUB_WORKSPACE submodule status | grep android) && echo deps_version=${commit:1:6} >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: android-deps
-        with:
-          path: android/deps
-          key: android-deps-${{steps.android-deps-ver.outputs.deps_version}}
-
-      - name: Build dependencies
-        if: steps.android-deps.outputs.cache-hit != 'true'
-        shell: bash
-        run: git submodule update --init && cd $GITHUB_WORKSPACE/android/deps && export ANDROID_HOME=/home/owner/android-sdk-linux && sh build.sh && rm .git
-
-      - name: Build
-        shell: bash
-        run: cd $GITHUB_WORKSPACE/android && export ANDROID_HOME=/home/owner/android-sdk-linux && sh /home/owner/build_release.sh
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SatDump-release.apk
-          path: ${{runner.workspace}}/SatDump/android/app/build/outputs/apk/release/app-release.apk
-
   build_ubuntu_2204:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
@@ -318,58 +286,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SatDump-Ubuntu-24.04
-          path: ${{runner.workspace}}/build/*.deb
-
-  build_linux_arm64:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ARM64
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Update repositories
-        run: sudo apt update
-
-      - name: Install dependencies
-        run: sudo apt install -y libcurl4-openssl-dev libglfw3-dev libfftw3-dev libvolk2-dev build-essential cmake pkgconf libjpeg-dev libpng-dev libtiff-dev libairspy-dev libairspyhf-dev libhackrf-dev librtlsdr-dev libomp-dev libnng-dev libiio-dev libzstd-dev libad9361-dev libbladerf-dev libuhd-dev liblimesuite-dev ocl-icd-opencl-dev libjemalloc-dev portaudio19-dev libhdf5-dev
-
-      - name: Delete build dir
-        run: rm -rf ${{runner.workspace}}/build
-
-      - name: Create Build Environment
-        # Some projects don't allow in-source building, so create a separate build directory
-        # We'll use this as our working directory for all subsequent commands
-        run: cmake -E make_directory ${{runner.workspace}}/build
-
-      - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        # Note the current convention is to use the -S and -B options here to specify source
-        # and build directories, but this is only available with CMake 3.13 and higher.
-        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
-      - name: Build
-        working-directory: ${{runner.workspace}}/build
-        shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: make -j4
-
-      - name: Package
-        working-directory: ${{runner.workspace}}/build
-        shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: make package
-
-      - name: Upload ZIP
-        uses: actions/upload-artifact@v4
-        with:
-          name: SatDump-Pi64-Latest
           path: ${{runner.workspace}}/build/*.deb
 
   build_macos_intel:
@@ -574,10 +490,11 @@ jobs:
           cp SatDump-macOS-Silicon/SatDump-macOS-Silicon.dmg satdump_out/SatDump-macOS-Silicon.dmg &&
           (cd SatDump-Windows_x64_Portable && zip -r ../satdump_out/SatDump-Windows_x64_Portable.zip *) &&
           cp SatDump-Windows_x64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_x64_Installer.exe &&
-          (cd SatDump-Windows_arm64_Portable && zip -r ../satdump_out/SatDump-Windows_arm64_Portable.zip *) &&
-          cp SatDump-Windows_arm64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_arm64_Installer.exe &&
           cp satdump_fedora_41_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_41_x86_64.rpm &&
           cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm
 
       - name: Update Nightly
         run: gh release upload nightly satdump_out/* -R ${{github.repository}} --clobber
+
+#(cd SatDump-Windows_arm64_Portable && zip -r ../satdump_out/SatDump-Windows_arm64_Portable.zip *) &&
+#cp SatDump-Windows_arm64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_arm64_Installer.exe &&
