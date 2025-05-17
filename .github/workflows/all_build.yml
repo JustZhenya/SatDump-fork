@@ -499,6 +499,50 @@ jobs:
         with:
           name: SatDump-macOS-Silicon
           path: ${{runner.workspace}}/build/*.dmg
+  
+  build_fedora_41:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Docker Image
+      run: cd $GITHUB_WORKSPACE/docker_builds/fedora_41 && docker build . --tag satdump_build
+
+    - name: Run Container
+      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump --env BUILD_NO="$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
+
+    - name: Recover RPM Archive
+      working-directory: ${{runner.workspace}}
+      run: docker cp build:/root/rpmbuild/RPMS/x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm ./
+
+    - name: Save RPM Archive
+      uses: actions/upload-artifact@v4
+      with:
+          name: satdump_fedora_41_x86_64
+          path: ${{runner.workspace}}/satdump-1.2.3-${{github.run_number}}.x86_64.rpm
+  
+  build_fedora_42:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Docker Image
+      run: cd $GITHUB_WORKSPACE/docker_builds/fedora_42 && docker build . --tag satdump_build
+
+    - name: Run Container
+      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump --env BUILD_NO="$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
+
+    - name: Recover RPM Archive
+      working-directory: ${{runner.workspace}}
+      run: docker cp build:/root/rpmbuild/RPMS/x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm ./
+
+    - name: Save RPM Archive
+      uses: actions/upload-artifact@v4
+      with:
+          name: satdump_fedora_42_x86_64
+          path: ${{runner.workspace}}/satdump-1.2.3-${{github.run_number}}.x86_64.rpm
 
   # Yes, since I was asked to do like SDR++ for this I did look at how Ryzerth has done it :-)
   update_nightly_release:
@@ -509,8 +553,8 @@ jobs:
         "build_ubuntu_2404",
         "build_macos_intel",
         "build_macos_silicon",
-        "build_linux_arm64",
-        "build_android"]
+        "build_fedora_41",
+        "build_fedora_42"]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
@@ -522,8 +566,18 @@ jobs:
         run: sudo apt install -y unzip
 
       - name: Copy files
-        run: mkdir satdump_out && cp SatDump-Ubuntu-22.04/satdump*.deb satdump_out/satdump_ubuntu_22.04_amd64.deb && cp SatDump-Ubuntu-24.04/satdump*.deb satdump_out/satdump_ubuntu_24.04_amd64.deb && cp SatDump-macOS-Intel/SatDump-macOS-Intel.dmg satdump_out/SatDump-macOS-Intel.dmg && cp SatDump-macOS-Silicon/SatDump-macOS-Silicon.dmg satdump_out/SatDump-macOS-Silicon.dmg && (cd SatDump-Windows_x64_Portable && zip -r ../satdump_out/SatDump-Windows_x64_Portable.zip *) && cp SatDump-Windows_x64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_x64_Installer.exe && cp SatDump-Pi64-Latest/satdump*.deb satdump_out/satdump_rpi64_latest_arm64.deb && cp SatDump-release.apk/app-release.apk satdump_out/SatDump-Android.apk && cp SatDump-AppImage/*.AppImage satdump_out/SatDump.AppImage
-# && (cd SatDump-Windows_arm64_Portable && zip -r ../satdump_out/SatDump-Windows_arm64_Portable.zip *) && cp SatDump-Windows_arm64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_arm64_Installer.exe
+        run: >
+          mkdir satdump_out &&
+          cp SatDump-Ubuntu-22.04/satdump*.deb satdump_out/satdump_ubuntu_22.04_amd64.deb &&
+          cp SatDump-Ubuntu-24.04/satdump*.deb satdump_out/satdump_ubuntu_24.04_amd64.deb &&
+          cp SatDump-macOS-Intel/SatDump-macOS-Intel.dmg satdump_out/SatDump-macOS-Intel.dmg &&
+          cp SatDump-macOS-Silicon/SatDump-macOS-Silicon.dmg satdump_out/SatDump-macOS-Silicon.dmg &&
+          (cd SatDump-Windows_x64_Portable && zip -r ../satdump_out/SatDump-Windows_x64_Portable.zip *) &&
+          cp SatDump-Windows_x64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_x64_Installer.exe &&
+          (cd SatDump-Windows_arm64_Portable && zip -r ../satdump_out/SatDump-Windows_arm64_Portable.zip *) &&
+          cp SatDump-Windows_arm64_Installer/SatDump-*.exe satdump_out/SatDump-Windows_arm64_Installer.exe &&
+          cp satdump_fedora_41_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_41_x86_64.rpm &&
+          cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm
 
       - name: Update Nightly
         run: gh release upload nightly satdump_out/* -R ${{github.repository}} --clobber
