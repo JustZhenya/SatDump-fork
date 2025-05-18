@@ -19,7 +19,7 @@ cp inc/* /usr/include/
 cd SatDump
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 make -j`nproc`
 
 sh ../make_rpm_package.sh
