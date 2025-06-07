@@ -20,7 +20,7 @@ License:    GPLv3+
 A generic satellite data processing software.
 
 %install
-cd ~/SatDump/build
+cd ~/SatDump-fork/build
 %make_install
 
 %post
