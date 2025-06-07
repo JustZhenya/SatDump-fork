@@ -17,7 +17,7 @@ wget https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run
 cp $BUILD_ARCH/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
 cp inc/* /usr/include/
 
-cd SatDump
+cd SatDump-fork
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
