@@ -11,6 +11,50 @@ permissions:
   contents: write
 
 jobs:
+  build_debian_12_amd64:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Docker Image
+      run: cd $GITHUB_WORKSPACE/docker_builds/debian_12 && docker build . --tag satdump_build
+
+    - name: Run Container
+      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump --env BUILD_NO="-$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
+
+    - name: Recover Deb Archive
+      working-directory: ${{runner.workspace}}
+      run: docker cp build:/root/SatDump/satdump_debian_amd64.deb ./
+
+    - name: Save Deb Archive
+      uses: actions/upload-artifact@v4
+      with:
+          name: satdump_debian_12_amd64
+          path: ${{runner.workspace}}/satdump_debian_amd64.deb
+
+  build_debian_12_arm64:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Docker Image
+      run: cd $GITHUB_WORKSPACE/docker_builds/debian_12 && docker build . --tag satdump_build
+
+    - name: Run Container
+      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump --env BUILD_NO="-$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
+
+    - name: Recover Deb Archive
+      working-directory: ${{runner.workspace}}
+      run: docker cp build:/root/SatDump/satdump_debian_arm64.deb ./
+
+    - name: Save Deb Archive
+      uses: actions/upload-artifact@v4
+      with:
+          name: satdump_debian_12_arm64
+          path: ${{runner.workspace}}/satdump_debian_arm64.deb
+
   build_fedora_41:
     runs-on: ubuntu-latest
 
@@ -58,6 +102,8 @@ jobs:
   # Yes, since I was asked to do like SDR++ for this I did look at how Ryzerth has done it :-)
   update_nightly_release:
     needs: [
+        "build_debian_12_amd64",
+        "build_debian_12_arm64",
         "build_fedora_41",
         "build_fedora_42"]
     runs-on: ubuntu-latest
@@ -68,11 +114,13 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Install zip
-        run: sudo apt install -y unzip
+        run: sudo apt-get install -y unzip
 
       - name: Copy files
         run: >
           mkdir satdump_out &&
+          cp satdump_debian_12_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_12_amd64.rpm &&
+          cp satdump_debian_12_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_12_arm64.rpm &&
           cp satdump_fedora_41_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_41_x86_64.rpm &&
           cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm
 
