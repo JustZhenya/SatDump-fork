@@ -24,4 +24,4 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 make -j`nproc`
 
 cd ..
-sh make_deb_package.sh ./build $BUILD_ARCH 'libc6, libgcc-s1, libstdc++6, libfftw3-bin, libglfw3, libjemalloc2, libnng1, libomp5-14, libopengl0, libpng16-16, libtiff6, libvolk2.5, libzstd1, libhdf5-103' 'libportaudiocpp0, libad9361-0, libairspy0, libairspyhf1, libbladerf2, libhackrf0, liblimesuite22.09-1, librtlsdr0, libuhd4.3.0, uhd-host, ocl-icd-libopencl1, zenity, libiio0'
+sh make_deb_package.sh ./build $BUILD_ARCH 'libc6, libgcc-s1, libstdc++6, libfftw3-bin, libglfw3, libjemalloc2, libnng1, libomp5-14, libopengl0, libpng16-16, libtiff6, libvolk2.5, libzstd1, libhdf5-103, ocl-icd-libopencl1' 'libportaudiocpp0, libad9361-0, libairspy0, libairspyhf1, libbladerf2, libhackrf0, liblimesuite22.09-1, librtlsdr0, libuhd4.3.0, uhd-host, zenity, libiio0'
