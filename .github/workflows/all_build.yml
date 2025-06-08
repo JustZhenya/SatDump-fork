@@ -211,12 +211,12 @@ jobs:
       - name: Copy files
         run: >
           mkdir satdump_out &&
-          cp satdump_debian_11_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_11_amd64.rpm &&
-          cp satdump_debian_11_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_11_arm64.rpm &&
-          cp satdump_debian_12_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_12_amd64.rpm &&
-          cp satdump_debian_12_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_12_arm64.rpm &&
-          cp satdump_debian_13_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_13_amd64.rpm &&
-          cp satdump_debian_13_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_13_arm64.rpm &&
+          cp satdump_debian_11_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_11_amd64.deb &&
+          cp satdump_debian_11_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_11_arm64.deb &&
+          cp satdump_debian_12_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_12_amd64.deb &&
+          cp satdump_debian_12_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_12_arm64.deb &&
+          cp satdump_debian_13_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_13_amd64.deb &&
+          cp satdump_debian_13_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_13_arm64.deb &&
           cp satdump_fedora_41_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_41_x86_64.rpm &&
           cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm
 
