@@ -3,23 +3,25 @@ set -e
 cd /root
 
 # Install dependencies and tools
-# TODO missing: libairspyhf-dev libairspy-dev libad9361-dev libbladerf-dev liblimesuite-dev
-dnf install -x mesa-va-drivers -x mesa-va-drivers -y cmake gcc g++ git p7zip p7zip-plugins wget xxd libtool autoconf rpmdevtools pkgconf \
-    fftw-devel glfw-devel volk-devel libzstd-devel libiio-devel libcorrect-devel \
-    hackrf-devel rtl-sdr-devel portaudio-devel \
-    libpng-devel curl-devel libjpeg-devel libtiff-devel jemalloc-devel hdf5-devel uhd-devel nng-devel ocl-icd-devel libomp-devel boost-devel
+apt-get update
+apt-get install -y libcurl4-openssl-dev libglfw3-dev libfftw3-dev libvolk-dev build-essential cmake pkgconf \
+    libjpeg-dev libpng-dev libtiff-dev libairspy-dev libairspyhf-dev libhackrf-dev librtlsdr-dev libomp-dev \
+    libnng-dev libiio-dev libzstd-dev libad9361-dev libbladerf-dev libuhd-dev liblimesuite-dev ocl-icd-opencl-dev \
+    libjemalloc-dev portaudio19-dev libhdf5-dev p7zip-full wget cmake
 
 # Install SDRPlay libraries
-wget https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
-7z x ./SDRplay_RSP_API-Linux-3.15.1.run
-7z x ./SDRplay_RSP_API-Linux-3.15.1
-cp x86_64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
+BUILD_ARCH=$(dpkg --print-architecture)
+wget https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run
+7z x ./SDRplay_RSP_API-Linux-3.15.2.run
+7z x ./SDRplay_RSP_API-Linux-3.15.2
+cp $BUILD_ARCH/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
 cp inc/* /usr/include/
 
-cd SatDump
+cd SatDump-fork
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 make -j`nproc`
 
-sh ../make_rpm_package.sh
+cd ..
+sh make_deb_package.sh ./build $BUILD_ARCH 'libc6, libgcc-s1, libstdc++6, libfftw3-bin, libglfw3, libjemalloc2, libnng1, libomp5-19, libopengl0, libpng16-16, libtiff6, libvolk3.2, libzstd1, libhdf5-310, ocl-icd-libopencl1' 'libportaudiocpp0, libad9361-0, libairspy0, libairspyhf1, libbladerf2, libhackrf0, liblimesuite23.11-1, librtlsdr0, libuhd4.8.0, uhd-host, zenity, libiio0'
