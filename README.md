@@ -11,6 +11,11 @@ There now also is a [Matrix](https://matrix.to/#/#satdump:altillimity.com) room 
 
 *Note : This is a very basic "how-to" skipping details and assuming some knowledge of what you are doing. For more details and advanced use cases, please see the [detailed documentation](https://docs.satdump.org).* 
 
+# Fork features
+
+- Debian 11 (bullseye), 12 (bookworm), 13 (trixie) builds with proper dependicies
+- Fedora 41, 42 builds
+
 ## GUI Version
 
 ### Offline processing (recorded data)
