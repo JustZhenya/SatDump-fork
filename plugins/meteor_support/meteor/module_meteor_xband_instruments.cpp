@@ -12,6 +12,8 @@
 #include "nlohmann/json_utils.h"
 #include "common/repack.h"
 
+#include "image/channel_transform.h"
+
 namespace meteor
 {
     namespace instruments
@@ -389,10 +391,17 @@ namespace meteor
                     kmss_products.set_timestamps(timestamps);
                     kmss_products.set_proj_cfg(loadJsonFile(resources::getResourcePath("projections_settings/meteor_m2-2_kmss_msu100_1.json")));
 
+                    std::vector<satdump::ChannelTransform> transforms_def = {satdump::ChannelTransform().init_none(), satdump::ChannelTransform().init_none(), satdump::ChannelTransform().init_none()};
+
+                    if (sat_name == "METEOR-M2-4")
+                        transforms_def = {satdump::ChannelTransform().init_none(),                                     //
+                                          satdump::ChannelTransform().init_affine_slantx(1, 1, 4, -3.8, 4000, 0.0012), //
+                                          satdump::ChannelTransform().init_affine_slantx(1, 1, -2, -2, 4000, 0.0005)};
+
                     for (int i = 0; i < 3; i++)
                     {
                         auto img = image::Image(msu100_1_dat[i].data(), 16, 8000, kmss_lines, 1);
-                        correctKMSSImage(d_parameters["satellite_number"].get<std::string>(), 0, i, img);
+                        //correctKMSSImage(d_parameters["satellite_number"].get<std::string>(), 0, i, img);
                         msu100_1_dat[i].clear();
                         kmss_products.images.push_back({"MSU100-" + std::to_string(i + 1), std::to_string(i + 1), img});
                     }
