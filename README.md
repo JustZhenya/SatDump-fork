@@ -14,7 +14,7 @@ There now also is a [Matrix](https://matrix.to/#/#satdump:altillimity.com) room 
 # Fork features
 
 - Debian 11 (bullseye), 12 (bookworm), 13 (trixie) builds with proper dependicies
-- Fedora 41, 42 builds
+- Fedora 42, 43 builds
 
 ## GUI Version
 
