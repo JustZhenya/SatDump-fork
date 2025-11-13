@@ -143,28 +143,6 @@ jobs:
           name: satdump_debian_13_arm64
           path: ${{runner.workspace}}/satdump_debian_arm64.deb
 
-  build_fedora_41:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Create Docker Image
-      run: cd $GITHUB_WORKSPACE/docker_builds/fedora_41 && docker build . --tag satdump_build
-
-    - name: Run Container
-      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump-fork --env BUILD_NO="$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
-
-    - name: Recover RPM Archive
-      working-directory: ${{runner.workspace}}
-      run: docker cp build:/root/rpmbuild/RPMS/x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm ./
-
-    - name: Save RPM Archive
-      uses: actions/upload-artifact@v4
-      with:
-          name: satdump_fedora_41_x86_64
-          path: ${{runner.workspace}}/satdump-1.2.3-${{github.run_number}}.x86_64.rpm
-  
   build_fedora_42:
     runs-on: ubuntu-latest
 
@@ -186,6 +164,28 @@ jobs:
       with:
           name: satdump_fedora_42_x86_64
           path: ${{runner.workspace}}/satdump-1.2.3-${{github.run_number}}.x86_64.rpm
+  
+  build_fedora_43:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Docker Image
+      run: cd $GITHUB_WORKSPACE/docker_builds/fedora_43 && docker build . --tag satdump_build
+
+    - name: Run Container
+      run: docker run --name build -v $GITHUB_WORKSPACE:/root/SatDump-fork --env BUILD_NO="$GITHUB_RUN_NUMBER" satdump_build /root/do_build.sh
+
+    - name: Recover RPM Archive
+      working-directory: ${{runner.workspace}}
+      run: docker cp build:/root/rpmbuild/RPMS/x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm ./
+
+    - name: Save RPM Archive
+      uses: actions/upload-artifact@v4
+      with:
+          name: satdump_fedora_43_x86_64
+          path: ${{runner.workspace}}/satdump-1.2.3-${{github.run_number}}.x86_64.rpm
 
   # Yes, since I was asked to do like SDR++ for this I did look at how Ryzerth has done it :-)
   update_nightly_release:
@@ -196,8 +196,8 @@ jobs:
         "build_debian_12_arm64",
         "build_debian_13_amd64",
         "build_debian_13_arm64",
-        "build_fedora_41",
-        "build_fedora_42"]
+        "build_fedora_42",
+        "build_fedora_43"]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
@@ -217,8 +217,8 @@ jobs:
           cp satdump_debian_12_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_12_arm64.deb &&
           cp satdump_debian_13_amd64/satdump_debian_amd64.deb satdump_out/satdump_debian_13_amd64.deb &&
           cp satdump_debian_13_arm64/satdump_debian_arm64.deb satdump_out/satdump_debian_13_arm64.deb &&
-          cp satdump_fedora_41_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_41_x86_64.rpm &&
-          cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm
+          cp satdump_fedora_42_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_42_x86_64.rpm &&
+          cp satdump_fedora_43_x86_64/satdump-1.2.3-$GITHUB_RUN_NUMBER.x86_64.rpm satdump_out/satdump_fedora_43_x86_64.rpm
 
       - name: Update Nightly
         run: gh release upload nightly satdump_out/* -R ${{github.repository}} --clobber
